@@ -1,6 +1,6 @@
 package com.example.fastcampusmysql.application.usecase;
 
-import com.example.fastcampusmysql.domain.follow.service.FollowWriterService;
+import com.example.fastcampusmysql.domain.follow.service.FollowWriteService;
 import com.example.fastcampusmysql.domain.member.service.MemberReadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 public class CrateFollowerUseCase {
     // 회원에 대한 쓰기 권한이 전혀 없다 - 의존성 분리
     final private MemberReadService memberReadService;
-    final private FollowWriterService followWriterService;
+    final private FollowWriteService followWriteService;
 
     public void execute(Long fromMemberId, Long toMemberId){
         /*
@@ -19,6 +19,6 @@ public class CrateFollowerUseCase {
         */
         var from = memberReadService.getMember(fromMemberId);
         var to = memberReadService.getMember(toMemberId);
-        followWriterService.create(from, to);
+        followWriteService.create(from, to);
     }
 }

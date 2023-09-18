@@ -34,7 +34,7 @@ create unique index Follow_fromMemberId_toMemberId_uindex
     on Follow (fromMemberId, toMemberId);
 
 
-create table POST
+create table Post
 (
     id int auto_increment,
     memberId int not null,

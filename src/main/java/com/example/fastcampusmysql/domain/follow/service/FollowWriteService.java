@@ -7,12 +7,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import java.util.Objects;
-
 // 도메인 서비스는 최대한 결합도를 낮추는것이 좋음(추후에 MSA로 쪼갤 수 있을 정도로)
 @RequiredArgsConstructor
 @Service
-public class FollowWriterService {
+public class FollowWriteService {
     final private FollowRepository followRepository;
 
     public void create(MemberDto from, MemberDto to) {
