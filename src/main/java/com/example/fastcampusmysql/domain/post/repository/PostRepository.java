@@ -7,10 +7,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
+import java.sql.SQLData;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -44,6 +46,18 @@ public class PostRepository {
                 """.formatted(TABLE);
         var params = new BeanPropertySqlParameterSource(request);
         return jdbcTemplate.query(sql, params, DAILY_POST_COUNT_MAPPER);
+    }
+
+    public int[] bulkInsert(List<Post> posts) {
+        var sql = """
+                INSERT INTO %s (memberId, contents, createdDate, createdAt)
+                VALUES (:memberId, :contents, :createdDate, :createdAt)
+                """.formatted(TABLE);
+
+        SqlParameterSource[] params = posts.stream()
+                .map(BeanPropertySqlParameterSource::new)
+                .toArray(SqlParameterSource[]::new);
+        return jdbcTemplate.batchUpdate(sql, params);
     }
 
     private Post insert(Post post) {

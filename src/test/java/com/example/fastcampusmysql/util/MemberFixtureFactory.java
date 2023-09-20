@@ -13,7 +13,6 @@ public class MemberFixtureFactory {
         // 유명 기업에서 easy-random을 이용하여 어떻게 짜는지 코드도 볼 수 있다.
         var seed = new LongRandomizer().getRandomValue();
         var param = new EasyRandomParameters()
-//                .stringLengthRange(0, 10)
                 .seed(seed);
         return new EasyRandom(param).nextObject(Member.class);
     }
