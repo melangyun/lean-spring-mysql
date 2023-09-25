@@ -17,8 +17,6 @@ public class MemberController {
     private final MemberWriterService memberWriterService;
     private final MemberReadService memberReadService;
 
-    // Controller단까지 Domain을 노출시키지 않기 위해 DTO를 사용한다.
-
     @PostMapping()
     public MemberDto register(@RequestBody RegisterMemberCommand command) {
         var member = memberWriterService.create(command);

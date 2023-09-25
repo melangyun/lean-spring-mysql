@@ -34,7 +34,6 @@ public class MemberNicknameHistoryRepository {
                 .usingGeneratedKeyColumns("id");
         SqlParameterSource params = new BeanPropertySqlParameterSource(history);
         var id = simpleJdbcInsert.executeAndReturnKey(params).longValue();
-        // 한번 만들어진 객체의 id값은 불변이기 때문에 새로 생성해 주어야함
 
         // TODO: 추후 JPA를 통하여 반환하도록 수정
         return MemberNicknameHistory.builder()
