@@ -1,5 +1,6 @@
 package com.example.fastcampusmysql.controller;
 
+import com.example.fastcampusmysql.application.usecase.GetTimelinePostsUsecase;
 import com.example.fastcampusmysql.domain.post.dto.DailyPostCount;
 import com.example.fastcampusmysql.domain.post.dto.DailyPostCountRequest;
 import com.example.fastcampusmysql.domain.post.dto.PostCommand;
@@ -30,6 +31,8 @@ import java.util.List;
 public class PostController {
     final private PostWriteService postWriteService;
     final private PostReadService postReadService;
+    final private GetTimelinePostsUsecase getTimelinePostsUsecase;
+
 
     @PostMapping()
     public Long create(PostCommand command) {
@@ -58,5 +61,12 @@ public class PostController {
         return postReadService.getPosts(memberId, cursorRequest);
     }
 
+    @GetMapping("members/{memberId}/timeline")
+    public PageCursor<Post> getTimelinePosts(
+            @PathVariable Long memberId,
+            CursorRequest cursorRequest
+    ) {
+        return getTimelinePostsUsecase.execute(memberId, cursorRequest);
+    }
 
 }
