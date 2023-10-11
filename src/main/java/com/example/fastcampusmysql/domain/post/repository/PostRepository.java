@@ -63,8 +63,6 @@ public class PostRepository {
     public Page<Post> findAllByMemberId(Long memberId, Pageable pageable) {
         // 보통은 파라미터로 sort를 받지 않음 => sort에 따라서 인덱스가 결정될 수 있기 때문에.
         // 쇼핑몰 같은 경우에는 정해진 몇개의 기준을 정해두고 선택 할 수 있음
-        System.out.println("pageable.getSort() = " + PageHelper.orderBy(pageable.getSort()));
-
         var sql = String.format("""
                 SELECT *
                 FROM %s
@@ -81,6 +79,80 @@ public class PostRepository {
 
         var posts = jdbcTemplate.query(sql, params, ROW_MAPPER);
         return new PageImpl<>(posts, pageable, getCount(memberId));
+    }
+
+    public List<Post> findAllByMemberIdAndOrderByIdDesc(Long memberId, int size) {
+        var params = new MapSqlParameterSource()
+                .addValue("memberId", memberId)
+                .addValue("size", size);
+
+        String query = String.format("""
+                SELECT *
+                FROM %s
+                WHERE memberId = :memberId
+                ORDER BY id DESC
+                LIMIT :size
+                """, TABLE);
+
+        return jdbcTemplate.query(query, params, ROW_MAPPER);
+    }
+
+    public List<Post> findAllByMemberIdInAndOrderByIdDesc(List<Long> memberIds, int size) {
+        if (memberIds.isEmpty()) {
+            return List.of();
+        }
+
+        var params = new MapSqlParameterSource()
+                .addValue("memberIds", memberIds)
+                .addValue("size", size);
+
+        String query = String.format("""
+                SELECT *
+                FROM %s
+                WHERE memberId in (:memberIds)
+                ORDER BY id DESC
+                LIMIT :size
+                """, TABLE);
+
+        return jdbcTemplate.query(query, params, ROW_MAPPER);
+    }
+
+    public List<Post> findAllByLessThanIdAndMemberIdInAndOrderByIdDesc(Long id, List<Long> memberIds, int size) {
+        if (memberIds.isEmpty()) {
+            return List.of();
+        }
+
+        var params = new MapSqlParameterSource()
+                .addValue("id", id)
+                .addValue("memberIds", memberIds)
+                .addValue("size", size);
+
+        String query = String.format("""
+                SELECT *
+                FROM %s
+                WHERE memberId in (:memberIds) and id < :id
+                ORDER BY id DESC
+                LIMIT :size
+                """, TABLE);
+
+        return jdbcTemplate.query(query, params, ROW_MAPPER);
+    }
+
+    public List<Post> findAllByLessThanIdAndMemberIdAndOrderByIdDesc(Long id, Long memberId, int size) {
+        var params = new MapSqlParameterSource()
+                .addValue("id", id)
+                .addValue("memberId", memberId)
+                .addValue("size", size);
+
+        String query = String.format("""
+                SELECT *
+                FROM %s
+                WHERE memberId = :memberId and id < :id
+                ORDER BY id DESC
+                LIMIT :size
+                """, TABLE);
+
+        return jdbcTemplate.query(query, params, ROW_MAPPER);
     }
 
     public int[] bulkInsert(List<Post> posts) {
