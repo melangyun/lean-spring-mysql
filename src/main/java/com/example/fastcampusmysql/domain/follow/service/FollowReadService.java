@@ -16,4 +16,8 @@ public class FollowReadService {
         return followRepository.findAllByMemberId(fromMemberId);
     }
 
+    public List<Follow> getFollowers(Long toMemberId) {
+        return followRepository.findAllFollowersByMemberId(toMemberId);
+    }
+
 }

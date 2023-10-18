@@ -55,6 +55,10 @@ public class PostReadService {
         return new PageCursor<>(cursorRequest.next(nextKey), posts);
     }
 
+    public List<Post>findAllByInIds(List<Long> postIds) {
+        return postRepository.findAllByIdIn(postIds);
+    }
+
     private PostDto toDto(Post post) {
         return new PostDto(
                 post.getId(),

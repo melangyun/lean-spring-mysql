@@ -45,7 +45,7 @@ public class PostRepository {
         if (post.getId() == null) {
             return insert(post);
         }
-        throw new UnsupportedOperationException("POST UPDATE IS NOT SUPPORTED");
+        return update(post);
     }
 
     public List<DailyPostCount> groupByCreatedDate(DailyPostCountRequest request) {
@@ -167,6 +167,26 @@ public class PostRepository {
         return jdbcTemplate.batchUpdate(sql, params);
     }
 
+    private Post update(Post post) {
+        var sql = String.format("""
+        UPDATE %s set 
+            memberId = :memberId, 
+            contents = :contents, 
+            createdDate = :createdDate, 
+            createdAt = :createdAt, 
+            likeCount = :likeCount,
+            version = :version + 1 
+        WHERE id = :id and version = :version
+        """, TABLE);
+
+        SqlParameterSource params = new BeanPropertySqlParameterSource(post);
+        var updatedCount = jdbcTemplate.update(sql, params);
+        if (updatedCount == 0) {
+            throw new RuntimeException("not updated");
+        }
+        return post;
+    }
+
 
     private Post insert(Post post) {
         SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate.getJdbcTemplate())
@@ -197,4 +217,17 @@ public class PostRepository {
     }
 
 
+    public List<Post> findAllByIdIn(List<Long> ids) {
+        if(ids.isEmpty()) {
+            return List.of();
+        }
+        var sql = """
+                SELECT *
+                FROM %s
+                WHERE id in (:ids)
+                """.formatted(TABLE);
+        var params = new MapSqlParameterSource()
+                .addValue("ids", ids);
+        return jdbcTemplate.query(sql, params, ROW_MAPPER);
+    }
 }
