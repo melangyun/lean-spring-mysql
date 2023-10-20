@@ -1,14 +1,15 @@
 package com.example.fastcampusmysql.controller;
 
+import com.example.fastcampusmysql.application.usecase.CreatePostLikeUseCase;
 import com.example.fastcampusmysql.application.usecase.CreatePostUseCase;
 import com.example.fastcampusmysql.application.usecase.GetTimelinePostsUseCase;
 import com.example.fastcampusmysql.domain.post.dto.DailyPostCount;
 import com.example.fastcampusmysql.domain.post.dto.DailyPostCountRequest;
 import com.example.fastcampusmysql.domain.post.dto.PostCommand;
+import com.example.fastcampusmysql.domain.post.dto.PostDto;
 import com.example.fastcampusmysql.domain.post.entity.Post;
 import com.example.fastcampusmysql.domain.post.service.PostReadService;
 import com.example.fastcampusmysql.domain.post.service.PostWriteService;
-import com.example.fastcampusmysql.domain.post.service.TimelineReadService;
 import com.example.fastcampusmysql.util.CursorRequest;
 import com.example.fastcampusmysql.util.PageCursor;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +35,7 @@ public class PostController {
     final private PostReadService postReadService;
     final private GetTimelinePostsUseCase getTimelinePostsUsecase;
     final private CreatePostUseCase createPostUseCase;
-
+    final private CreatePostLikeUseCase createPostLikeUseCase;
 
 
     @PostMapping()
@@ -48,7 +49,7 @@ public class PostController {
     }
 
     @GetMapping("members/{memberId}")
-    public Page<Post> getPosts(
+    public Page<PostDto> getPosts(
             @PathVariable Long memberId,
             Pageable pageable
     ) {
@@ -71,10 +72,15 @@ public class PostController {
         return getTimelinePostsUsecase.executeByTimeline(memberId, cursorRequest);
     }
 
-    @PostMapping("/{postId}/like")
-    public void likePost(@PathVariable Long postId){
+    @PostMapping("/{postId}/like/v1")
+    public void likePost(@PathVariable Long postId) {
 //        postWriteService.likePost(postId);
         postWriteService.likePostByOptimisticLock(postId);
+    }
+
+    @PostMapping("/{postId}/like/v2")
+    public void likePost(@PathVariable Long postId, @RequestParam Long memberId) {
+        createPostLikeUseCase.execute(postId, memberId);
     }
 
 }
