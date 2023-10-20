@@ -61,6 +61,11 @@ create table Timeline
         primary key (id)
 );
 
+ALTER TABLE POST ADD COLUMN likeCount int default 0;
+
+# null 이면 에러가 발생할수 있으므로 일단 0
+ALTER TABLE POST ADD COLUMN version int default 0;
+
 create table PostLike
 (
     id int auto_increment,

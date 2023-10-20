@@ -7,6 +7,7 @@ import com.example.fastcampusmysql.domain.member.repository.MemberNicknameHistor
 import com.example.fastcampusmysql.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -16,6 +17,10 @@ public class MemberWriterService {
     private final MemberRepository memberRepository;
     private final MemberNicknameHistoryRepository memberNicknameHistoryRepository;
 
+    // 동작 방식이 proxy 방식이어서, MemberWriterService 서비스를 상속받는 클래스를 만들어줌
+    // 클래스가 대신 이 MemberWriteService 를 감싸고 있는데 그러다 보니, inner 함수(private)가 제대로 먹지 않는 이슈가 있음
+    // -> private 함수에 Transactional를 붙이면 이 적용되지 않음
+    @Transactional
     public Member create(RegisterMemberCommand command) {
         /*
         목표 - 회원정보(이름, 닉네임, 이메일, 생년월일)를 입력받아서 DB에 저장
@@ -36,6 +41,7 @@ public class MemberWriterService {
         return newMember;
     }
 
+    @Transactional
     public void changeNickName(Long id, String nickname) {
         var member = memberRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));

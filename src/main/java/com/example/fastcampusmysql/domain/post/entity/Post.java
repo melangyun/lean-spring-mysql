@@ -18,14 +18,25 @@ public class Post {
 
     final private LocalDate createdDate;
 
+    private Long likeCount;
+
     final private LocalDateTime createdAt;
 
+    private Long version;
+
     @Builder
-    public Post(Long id, Long memberId, String contents, LocalDate createdDate, LocalDateTime createdAt) {
+    public Post(Long id, Long memberId, String contents, LocalDate createdDate, Long likeCount, LocalDateTime createdAt, Long version) {
         this.id = id;
         this.memberId = Objects.requireNonNull(memberId);
         this.contents = Objects.requireNonNull(contents);
         this.createdDate = createdDate == null ? LocalDate.now() : createdDate;
+        this.likeCount = likeCount == null ? 0L : likeCount;
+        // 별도의 마이그레이션 배치 || null이면 기본값을 채워주는 전략
+        this.version = version == null ? 0L : version;
         this.createdAt = createdAt == null ? LocalDateTime.now() : createdAt;
+    }
+
+    public void incrementLikeCount() {
+        likeCount++;
     }
 }

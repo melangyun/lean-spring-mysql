@@ -19,6 +19,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Repository
@@ -37,6 +38,8 @@ public class PostRepository {
             .id(rs.getLong("id"))
             .memberId(rs.getLong("memberId"))
             .contents(rs.getString("contents"))
+            .likeCount(rs.getLong("likeCount"))
+            .version(rs.getLong("version"))
             .createdDate(rs.getObject("createdDate", LocalDate.class))
             .createdAt(rs.getTimestamp("createdAt").toLocalDateTime())
             .build();
@@ -46,6 +49,17 @@ public class PostRepository {
             return insert(post);
         }
         return update(post);
+    }
+
+    public Optional<Post> findById(Long id, Boolean requiredLock) {
+        var sql = "SELECT * FROM %s WHERE id = :id" .formatted(TABLE);
+        if(requiredLock) {
+            sql += " FOR UPDATE";
+        }
+        var params = new MapSqlParameterSource()
+                .addValue("id", id);
+        var nullablePost = jdbcTemplate.queryForObject(sql, params, ROW_MAPPER);
+        return Optional.ofNullable(nullablePost);
     }
 
     public List<DailyPostCount> groupByCreatedDate(DailyPostCountRequest request) {
@@ -169,15 +183,15 @@ public class PostRepository {
 
     private Post update(Post post) {
         var sql = String.format("""
-        UPDATE %s set 
-            memberId = :memberId, 
-            contents = :contents, 
-            createdDate = :createdDate, 
-            createdAt = :createdAt, 
-            likeCount = :likeCount,
-            version = :version + 1 
-        WHERE id = :id and version = :version
-        """, TABLE);
+                UPDATE %s set 
+                    memberId = :memberId, 
+                    contents = :contents, 
+                    createdDate = :createdDate, 
+                    createdAt = :createdAt, 
+                    likeCount = :likeCount,
+                    version = version + 1
+                WHERE id = :id and version = :version
+                """, TABLE);
 
         SqlParameterSource params = new BeanPropertySqlParameterSource(post);
         var updatedCount = jdbcTemplate.update(sql, params);
@@ -218,7 +232,7 @@ public class PostRepository {
 
 
     public List<Post> findAllByIdIn(List<Long> ids) {
-        if(ids.isEmpty()) {
+        if (ids.isEmpty()) {
             return List.of();
         }
         var sql = """
